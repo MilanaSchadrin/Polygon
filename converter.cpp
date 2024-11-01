@@ -1,7 +1,7 @@
 #include "converter.h"
 
 
-void Converter::loadJSON(const std::string& filename) {
+void Converter::loadJson(const std::string& filename) {
     // Чтение JSON-файла
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -27,15 +27,20 @@ void Converter::loadJSON(const std::string& filename) {
         return;
     }
 
-    for (const auto& layerValue : document.GetArray()) {
-        if (!layerValue.IsObject()) {
+    /*for (const auto& layerValue: document.GetObject()) {
+        if (!layerValue.IsArray()) {
             std::cerr << "Ошибка: Ожидался объект слоя." << std::endl;
             continue;
-        }
+        }*/
+       const rapidjson::Value& layersArray = document["layers"];
 
+       for (const rapidjson::Value& layer : layersArray.GetArray()) {
+        // Выводим имя слоя
+        //std::cout << "Слой: " << layer.GetString() << std::endl;
         Layer layer;
-        layer.name = layerValue["name"].GetString();
-        layer.level = layerValue["level"].GetInt();
+        layer.name = layersArray["name"].GetString();
+        
+       }
 
         // Проверяем, есть ли полигоны
         const auto& polygonsValue = layerValue["polygons"];
@@ -45,7 +50,7 @@ void Converter::loadJSON(const std::string& filename) {
             // Получаем координаты
             const auto& coordsValue = polygonValue["coords"];
             for (const auto& coordValue : coordsValue.GetArray()) {
-                Coordinate coord;
+                Point coord;
                 coord.x = coordValue[0].GetInt();
                 coord.y = coordValue[1].GetInt();
                 polygon.coords.push_back(coord);
@@ -74,7 +79,7 @@ void Converter::loadJSON(const std::string& filename) {
 
     std::cout << "Файл успешно загружен. Всего слоев: " << layers.size() << std::endl;
 }
-void Converter::loadJSON(const std::string& filename){
+void Converter::saveToJson(const std::string& filename){
     // Создание объекта JSON
         rapidjson::Document document;
         document.SetObject();

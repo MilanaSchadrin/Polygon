@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "rapidjson/filereadstream.h"
 #include <unordered_map>
 //include "polygon.h"
 //include "layer.h"
@@ -17,40 +18,52 @@
 #include "rapidjson/error/en.h"
 
 // Структура координат
-class Coordinate {
-    float x;
-    float y;
+class Point {
+    double x;
+    double y;
+    std::unordered_map<std::string, double> ravel() const;
+};
+
+class Hole
+{
+    std::vector<Point> vertices;
+    void append(const Point& point);
+    std::unordered_map<std::string, Hole> ravel() const
 };
 
 // Структура для описания полигона
 class Polygon {
-    std::vector<Coordinate> coords;
-    std::vector<std::vector<Coordinate>> holes;
+    std::vector<Point> coords;
+    std::vector<Hole> holes;
+    std::unordered_map<std::string, Polygon> ravel() const;
+    void add_hole(const Hole& hole);
+    void append(const Point& point);
 };
 
 // Структура для описания слоя
 class Layer {
     std::string name;
-    int level;
+    void append(const Polygon& polygon);
     std::vector<Polygon> polygons;
+    std::unordered_map<std::string, Layer> ravel() const;
 };
 
 class LayerPack {
 public:
     std::vector<Layer> layers;
-
-    std::unordered_map<std::string, VariantType> ravel() {
+    void append_layer(const Layer& layer);
+    std::unordered_map<std::string, Layer> get_layers_by_name() const {
         // Реализация метода ravel
         // Возвращает словарь: названия полей - значения полей
-    }
-}
+    };
+};
 // Класс для разбора JSON-файла
 class Converter {
 public:
     std::vector<Layer> layers;
 
     // Метод для загрузки и разбора JSON
-    void loadJSON(const std::string& filename);
+    void loadJson(const std::string& filename);
     void saveToJson(const std::string& filename);
 };
 

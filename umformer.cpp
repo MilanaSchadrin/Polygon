@@ -98,56 +98,65 @@ void Converter::saveToJson(const std::string& filename){
         for (int j=0;j<polygonIndex.size();j++)
         {
             const Polygon& polygon = polygonIndex[j];//polygon in layer
+            Value polygonObject(kObjectType);//polygon object
             //polygon.ravel() VarientType
             vector<Point> pointIndex = polygon.get_vertices();
+            Value pointArray(rapidjson::kArrayType);//points array
             for (int k=0;k<pointIndex.size();k++)
             {
+                Value coordArray(rapidjson::kArrayType);//coord array
                 const Point& point = pointIndex[k];//coord of polygon
                 unordered_map<string,double> pointCoords = point.ravel();//"x"-x,"y"-y
                 double x = pointCoords.at("x");//add as x
                 double y = pointCoords.at("y");// add as y
+                coordArray.PushBack(x,document.GetAllocator());//[x]
+                coordArray.PushBack(y,document.GetAllocator());//[x,y]
+                pointArray.PushBack(coordArray,document.GetAllocator());//[[x,y]]
             }
+            polygonObject.AddMember("cords",pointArray,document.GetAllocator());
+            Value holesArrays(kArrayType);//holes=[]
             vector<Hole> holeIndex = polygon.get_holes();//holes in polygon
             for (int k=0;k<holeIndex.size();k++)
             {
+                Value holeOneArray(kArrayType);//hole=[[a]]
                 const Hole& hole = holeIndex.at(k);
                 vector<Point> pointHole = hole.get_vertices();
                 for(int m=0; m<pointHole.size();m++)
                 {
+                    Value holeCoord(kArrayType);
                     const Point& point = pointHole[m];//coord of hole
                     unordered_map<string,double> holeCoords = point.ravel();//"x"-x,"y"-y
                     double x = holeCoords.at("x");//add as x
                     double y = holeCoords.at("y");
+                    holeCoord.PushBack(x,document.GetAllocator());//[x]
+                    holeCoord.PushBack(y,document.GetAllocator());//[x,y]
+                    holeOneArray.PushBack(holeCoord,document.GetAllocator());//[]
                 }
+                holesArrays.PushBack(holeOneArray,document.GetAllocator());
             };
-        }
-        
+            polygonObject.AddMember("holes",holesArrays,document.GetAllocator());
+            polygonsArray.PushBack(polygonObject,document.GetAllocator());
+        };
+    layerObject.AddMember("polygons",polygonsArray,document.GetAllocator());
+    layersObject.PushBack(layerObject,document.GetAllocator());
     }
-    /*{
-    "layers": [
+    document.AddMember("layers",layersObject,document.GetAllocator());
+    //Write to file
+    FILE* fp = fopen(filename.c_str(), "wb");
 
-        {"layer_name_1": {
+    if(!fp)
+    {
+         std::cerr << "Failed to open file: " << filename << std::endl;
+         return;
+    }
 
-            "name": layer_name_1,
-
-            "polygons": [...]
-
-        }},
-
-        {"layer_name_2": {
-
-            "name": layer_name_2,
-
-            "polygons": [...]
-
-        }},
-
-        ...
-
-    ]}*/
-    rapidjson::Document document;
-    document.SetObject();
+    char writeBuffer[65536];
+    FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+    Writer<FileWriteStream> writer(os);
+    document.Accept(writer);
+    fclose(fp);
     };
+    
 LayerPack& Converter::getLayerPack(){
         return this->layerpack;
     }

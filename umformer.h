@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include "rapidjson/filereadstream.h"
+#include "rapidjson/filewritestream.h"
 #include <unordered_map>
 //include "polygon.h"
 //include "layer.h"

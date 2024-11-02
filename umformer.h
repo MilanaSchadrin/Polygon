@@ -38,6 +38,7 @@ class Hole
     std::vector<Point> vertices;
     public:
     void append(const Point& point);
+    const std::vector<Point>& get_vertices() const ;
     std::unordered_map<std::string, Hole> ravel() const;
 };
 
@@ -49,14 +50,21 @@ class Polygon {
     std::unordered_map<std::string, Polygon> ravel() const;
     void add_hole(const Hole& hole);
     void append(const Point& point);
+    const std::vector<Point>& get_vertices() const;
+    const Point& operator[](size_t index) const;
+    const std::vector<Hole>& get_holes() const;
+
 };
 
 // Структура для описания слоя
 class Layer {
     public:
     std::string name;
+    const std::string& get_name() const;
     void append(const Polygon& polygon);
     std::vector<Polygon> polygons;
+    const std::vector<Polygon>& get_polygons() const;
+    const Polygon& operator[](size_t index) const;
     std::unordered_map<std::string, Layer> ravel() const;
 };
 
@@ -68,6 +76,9 @@ public:
         // Реализация метода ravel
         // Возвращает словарь: названия полей - значения полей
     };
+    const std::vector<Layer>& get_layers() const;
+    const Layer& operator[](size_t index) const;
+    const Layer& operator[](const std::string& name) const;
 };
 // Класс для разбора JSON-файла
 class Converter {

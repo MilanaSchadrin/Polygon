@@ -86,7 +86,8 @@ void Converter::saveToJson(const std::string& filename){
     Value layersObject(kArrayType);//empty array for layers
     //unordered_map<std::string, Layer> layerMap =  this->layerpack.get_layers_by_name();//key name - layer
     vector<Layer> layerIndexs = this->layerpack.get_layers();//vector of layers
-    for(int i=0; i<layerIndexs.size();i++)//to add all layers
+    int lsize = static_cast<int>(layerIndexs.size());
+    for(int i=0; i<lsize;i++)//to add all layers
     {
         const Layer& layer = layerIndexs[i];//layer with index i
         string names = layer.get_name();//layer name with index i
@@ -95,14 +96,16 @@ void Converter::saveToJson(const std::string& filename){
         layerObject.AddMember("level",Value(to_string(i).c_str(), document.GetAllocator()),document.GetAllocator());//maybewrong
         vector<Polygon> polygonIndex = layer.get_polygons();//polygons in layer i
         Value polygonsArray(rapidjson::kArrayType);//array to store polygons
-        for (int j=0;j<polygonIndex.size();j++)
+        int psize = static_cast<int>(polygonIndex.size());
+        for (int j=0;j<psize;j++)
         {
             const Polygon& polygon = polygonIndex[j];//polygon in layer
             Value polygonObject(kObjectType);//polygon object
             //polygon.ravel() VarientType
             vector<Point> pointIndex = polygon.get_vertices();
             Value pointArray(rapidjson::kArrayType);//points array
-            for (int k=0;k<pointIndex.size();k++)
+            int ppsize = static_cast<int>(pointIndex.size());
+            for (int k=0;k<ppsize;k++)
             {
                 Value coordArray(rapidjson::kArrayType);//coord array
                 const Point& point = pointIndex[k];//coord of polygon
@@ -116,12 +119,14 @@ void Converter::saveToJson(const std::string& filename){
             polygonObject.AddMember("cords",pointArray,document.GetAllocator());
             Value holesArrays(kArrayType);//holes=[]
             vector<Hole> holeIndex = polygon.get_holes();//holes in polygon
-            for (int k=0;k<holeIndex.size();k++)
+            int hsize = static_cast<int>(holeIndex.size());
+            for (int k=0;k<hsize;k++)
             {
                 Value holeOneArray(kArrayType);//hole=[[a]]
                 const Hole& hole = holeIndex.at(k);
                 vector<Point> pointHole = hole.get_vertices();
-                for(int m=0; m<pointHole.size();m++)
+                int msize = static_cast<int>(pointHole.size());
+                for(int m=0; m<msize;m++)
                 {
                     Value holeCoord(kArrayType);
                     const Point& point = pointHole[m];//coord of hole
@@ -152,7 +157,8 @@ void Converter::saveToJson(const std::string& filename){
 
     char writeBuffer[65536];
     FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
-    Writer<FileWriteStream> writer(os);
+    PrettyWriter<FileWriteStream> writer(os);
+    writer.SetIndent(' ',4);//try this one'\n' 
     document.Accept(writer);
     fclose(fp);
     };

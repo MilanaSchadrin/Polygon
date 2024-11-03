@@ -8,7 +8,7 @@ void Converter::loadJson(const std::string& filename) {
         std::cerr << "Ошибка: Не удалось открыть файл " << filename << std::endl;
         return;
     }*/
-    FILE* fp = fopen(filename.c_str(), "rb"); 
+    FILE* fp = fopen(filename.c_str(), "rb"); //r for non Windows
     if (!fp){
         std::cerr << "Error. Can't open a file " << filename << std::endl;
         return;
@@ -33,7 +33,7 @@ void Converter::loadJson(const std::string& filename) {
         assert(b[i].IsObject());
         //layername
         assert(b[i].HasMember("name"));
-        cout<< b[i]["name"].GetString();
+        //cout<< b[i]["name"].GetString();
         Layer layer{b[i]["name"].GetString()};//object layer with name
         //polygons
         assert(b[i].HasMember("polygons"));
@@ -56,7 +56,7 @@ void Converter::loadJson(const std::string& filename) {
             assert(cordar.IsArray());
             for (const Value& cord : cordar.GetArray()) {
                 Point dot{cord[0].GetDouble(),cord[1].GetDouble()};
-                std::cout << cord[0].GetDouble() << ", " << cord[1].GetDouble() << std::endl;
+                //std::cout << cord[0].GetDouble() << ", " << cord[1].GetDouble() << std::endl;
                 polygon.append(dot);
             }
             //holes
@@ -69,7 +69,7 @@ void Converter::loadJson(const std::string& filename) {
                     Point point{pt[0].GetDouble(),pt[1].GetDouble()};
                     Hole hole;
                     hole.append(point);
-                    std::cout << pt[0].GetDouble() << ", " << pt[1].GetDouble() << std::endl;
+                    //std::cout << pt[0].GetDouble() << ", " << pt[1].GetDouble() << std::endl;
                     polygon.add_hole(hole);
                     }
             }
@@ -147,7 +147,7 @@ void Converter::saveToJson(const std::string& filename){
     }
     document.AddMember("layers",layersObject,document.GetAllocator());
     //Write to file
-    FILE* fp = fopen(filename.c_str(), "wb");
+    FILE* fp = fopen(filename.c_str(), "wb");// w for Non-windows
 
     if(!fp)
     {
@@ -158,7 +158,7 @@ void Converter::saveToJson(const std::string& filename){
     char writeBuffer[65536];
     FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
     PrettyWriter<FileWriteStream> writer(os);
-    writer.SetIndent(' ',4);//try this one'\n' 
+    writer.SetIndent(' ',2);//try this one'\n' 
     document.Accept(writer);
     fclose(fp);
     };
@@ -166,3 +166,14 @@ void Converter::saveToJson(const std::string& filename){
 LayerPack& Converter::getLayerPack(){
         return this->layerpack;
     }
+
+int main()
+{
+    Converter converter;
+    converter.loadJson("layout.json");
+    LayerPack r = converter.getLayerPack();
+    vector<Layer> la =r.get_layers();
+    //cout<<la.at(1).get_name()<<endl;
+    converter.saveToJson("writer.json");
+    return 0;
+};

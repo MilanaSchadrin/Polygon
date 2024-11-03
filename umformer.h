@@ -53,9 +53,10 @@ class Hole
 
 // Структура для описания полигона
 class Polygon {
+    public:
+    Polygon() {};
     std::vector<Point> coords;
     std::vector<Hole> holes;
-    public:
     void add_hole(const Hole& hole){
         this->holes.push_back(hole);
     };
@@ -135,6 +136,7 @@ public:
         return layers[index];
     };
 };
+
 // Класс для разбора JSON-файла
 class Converter {
     LayerPack layerpack;

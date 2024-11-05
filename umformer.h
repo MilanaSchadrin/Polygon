@@ -1,12 +1,10 @@
 #ifndef UMFORMER_H
 #define UMFORMER_H
 
-#include <unordered_map>
-#include <string>
-#include <vector>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "Entity.h"
 #include "rapidjson-1.1.0/include/rapidjson/filereadstream.h"
 #include "rapidjson-1.1.0/include/rapidjson/filewritestream.h"
 #include "rapidjson-1.1.0/include/rapidjson/document.h"
@@ -17,7 +15,7 @@
 using namespace std; 
 using namespace rapidjson;
 
-// Структура координат
+/*
 class Point {
     public:
     double x;
@@ -51,7 +49,6 @@ class Hole
     };
 };
 
-// Структура для описания полигона
 class Polygon {
     public:
     Polygon() {};
@@ -83,7 +80,6 @@ class Polygon {
 
 };
 
-// Структура для описания слоя
 class Layer {
     
     std::string name;
@@ -135,7 +131,7 @@ public:
         }
         return layers[index];
     };
-};
+};*/
 
 // Класс для разбора JSON-файла
 class Converter {

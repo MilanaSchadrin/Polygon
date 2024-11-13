@@ -1,36 +1,28 @@
 #include "umformer.h"
 
-
 void Converter::loadJson(const std::string& filename) {
 
     // Чтение JSON-файла и создание объектов
-    FILE* fp = fopen(filename.c_str(), "w+"); //r for non Windows
+    FILE* fp = fopen(filename.c_str(), "r"); //r for non Windows
     
-    if (!fp){
+    if (!fp)
+    {
         std::cerr << "Error. Can't open a file " << filename << std::endl;
         return;
     }
-    
-    char empt;
-    if(fscanf(fp,"%c",&empt)==EOF)//file is empty or no file at all
+
+    //for an empty file
+    fseek(fp,0,SEEK_END);
+    long fileSize = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    if (fileSize == 0) 
     {
-        rapidjson::Document document;
-        document.SetObject();
-        Document::AllocatorType& allocator = document.GetAllocator();
-        Value layersObject(kArrayType);
-        document.AddMember("layers",layersObject,allocator);
-
-        char emptyBuffer[1024];
-        FileWriteStream os(fp, emptyBuffer, sizeof(emptyBuffer));
-        PrettyWriter<FileWriteStream> emptyWriter(os);
-
-        document.Accept(emptyWriter);
-
-        return; //writes to file {layers:[]}
+        fclose(fp);
+        return;
     }
-
-
-    char readBuffer[65536]; //Parse file
+    
+    char readBuffer[BUFF_SIZE]; //Parse file
     rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
     rapidjson::Document document; 
     document.ParseStream(is);
@@ -43,7 +35,9 @@ void Converter::loadJson(const std::string& filename) {
     assert(document.IsObject());
     const Value& b = document["layers"];
     assert(b.IsArray());
-    for (SizeType i = 0; i < b.Size(); i++) {
+
+    for (SizeType i = 0; i < b.Size(); i++) 
+    {
     assert(b[i].IsObject());
     assert(b[i].HasMember("name"));
     
@@ -55,7 +49,8 @@ void Converter::loadJson(const std::string& filename) {
     assert(pol.IsArray());
     
     // Check all polygon in this layer
-    for (SizeType j = 0; j < pol.Size(); j++) {
+    for (SizeType j = 0; j < pol.Size(); j++) 
+    {
 
         assert(pol[j].IsObject());
         assert(pol[j].HasMember("cords"));
@@ -66,7 +61,8 @@ void Converter::loadJson(const std::string& filename) {
         Polygon polygon;
 
         // Coords to polygon
-        for (const Value& cord : cordar.GetArray()) {
+        for (const Value& cord : cordar.GetArray()) 
+        {
 
             Point dot{cord[0].GetDouble(), cord[1].GetDouble()};
             polygon.append(dot);
@@ -77,11 +73,13 @@ void Converter::loadJson(const std::string& filename) {
         assert(holear.IsArray());
 
         // Holes array to current polygon
-        for (const Value& holee : holear.GetArray()) {
+        for (const Value& holee : holear.GetArray()) 
+        {
 
             Hole hole;
 
-            for (const Value& pt : holee.GetArray()) {
+            for (const Value& pt : holee.GetArray()) 
+            {
 
                 Point point{pt[0].GetDouble(), pt[1].GetDouble()};
                 hole.append(point); // Add point to hole
@@ -132,7 +130,7 @@ void Converter::saveToJson(const std::string& filename){
             const Polygon& polygon = polygonIndex[j];//polygon in layer
             Value polygonObject(kObjectType);//polygon object
 
-            vector<Point> pointIndex = polygon.get_vertices();
+            vector<Point> pointIndex = polygon.get_points();
             Value pointArray(rapidjson::kArrayType);//points array
             int ppsize = static_cast<int>(pointIndex.size());
 
@@ -151,6 +149,7 @@ void Converter::saveToJson(const std::string& filename){
 
                 pointArray.PushBack(coordArray,pointAllocator);//[[x,y]]
             }
+
             polygonObject.AddMember("cords",pointArray,polyAllocator);
             pointArray.SetArray();
 
@@ -164,7 +163,7 @@ void Converter::saveToJson(const std::string& filename){
                 Value holeOneArray(kArrayType);//hole=[[a]]
 
                 const Hole& hole = holeIndex.at(k);
-                vector<Point> pointHole = hole.get_vertices();
+                vector<Point> pointHole = hole.get_points();
                 int msize = static_cast<int>(pointHole.size());
 
                 for(int m=0; m<msize;m++)
@@ -205,7 +204,7 @@ void Converter::saveToJson(const std::string& filename){
          return;
     }
 
-    char writeBuffer[65536];
+    char writeBuffer[BUFF_SIZE];
     FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
     PrettyWriter<FileWriteStream> writer(os);
     //writer.SetIndent(' ',2);//try this one'\n' 
@@ -217,10 +216,10 @@ LayerPack& Converter::getLayerPack(){
         return this->layerpack;
     }
 
-/*int main()
+int main()
 {
     Converter converter;
-    converter.loadJson("lay.json");
+    converter.loadJson("reader.json");
     converter.saveToJson("writer.json");
     return 0;
-};*/
+};

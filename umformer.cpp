@@ -210,16 +210,17 @@ void Converter::saveToJson(const std::string& filename){
     //writer.SetIndent(' ',2);//try this one'\n' 
     document.Accept(writer);
     fclose(fp);
-    };
+};
     
-LayerPack& Converter::getLayerPack(){
-        return this->layerpack;
-    }
+LayerPack& Converter::getLayerPack()
+{
+    return this->layerpack;
+}
 
-int main()
+/*int main()
 {
     Converter converter;
     converter.loadJson("reader.json");
     converter.saveToJson("writer.json");
     return 0;
-};
+};*/

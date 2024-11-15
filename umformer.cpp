@@ -3,8 +3,24 @@
 void Converter::loadJson(const std::string& filename) {
 
     // Чтение JSON-файла и создание объектов
-    FILE* fp = fopen(filename.c_str(), "r"); //r for non Windows
-    
+    FILE* fp;
+    int exis;
+    const char * fn = filename.c_str();
+    fp = fopen(fn,"r");
+    if (fp == NULL)
+    {exis=0;} 
+    else {
+    exis=1; 
+    fclose(fp);
+    }
+    if(exis == 1)
+    {
+        fp=fopen(fn,"r");
+    }
+    else
+    {
+        fp=fopen(fn,"w");
+    }
     if (!fp)
     {
         std::cerr << "Error. Can't open a file " << filename << std::endl;
@@ -21,6 +37,7 @@ void Converter::loadJson(const std::string& filename) {
         fclose(fp);
         return;
     }
+    
     
     char readBuffer[BUFF_SIZE]; //Parse file
     rapidjson::FileReadStream is(fp, readBuffer, sizeof(readBuffer));
